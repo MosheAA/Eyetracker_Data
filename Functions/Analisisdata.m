@@ -1,21 +1,27 @@
 
-file_ID = "C:\Users\ASUS\Documents\MATLAB\VideoMoral\1_all_gaze.csv"; 
-Fs = 60; 
-allgaze = import_data_gaze(file_ID);
-time_v = 0:1/Fs:length(allgaze)/Fs - (1/Fs);
-time_2 = 0:1/10:length(allgaze)/10 - (1/Fs);
+file_ID = "..\MATLAB\Eyetracker_Data-main\Data\1_all_gaze.csv"; 
+vidObj = VideoReader('..\MATLAB\Eyetracker_Data-main\Data\video_export_01-25-23-15.35.44.avi');
 
+Fs_g = 61;                                      % Sampling frequency Gaze 
+Fs_v = vidObj.FrameRate;                        % Sampling frequency Video 
+
+allgaze = import_data_gaze(file_ID);                  % Import gaze data
+time_v = 0:1/Fs_g:length(allgaze)/Fs_g - (1/Fs_g);    % Time vector
+time_2 = 0:1/Fs_v:vidObj.NumFrames/Fs_v - (1/Fs_v);   % Time vector
+figure
 plot(allgaze(:,1),allgaze(:,2))
-test = downsample(allgaze,6);
-vidObj = VideoReader('0001-scrn.mp4');
-vidObj.CurrentTime = 1;
-i = find(time_2>vidObj.CurrentTime,1,"first");
-while hasFrame(vidObj)
+plot(allgaze(:,3),allgaze(:,4))
+%% Visualize data 
+test               = downsample(allgaze,6);
+vidObj.CurrentTime = 0;
+i                  = find(time_2>=vidObj.CurrentTime,1,"first");
+
+while i < 100
     vidFrame = readFrame(vidObj);
     ax = gca();
     imshow(vidFrame)
     hold(ax, 'on');
-    plot(ax, test(1:i,1)*1920,test(1:i,2)*1080);
+    plot(ax, test(1:i,3)*1920,test(1:i,4)*1080);
     hold(ax, 'off');
     pause(1/vidObj.FrameRate);
     i = i+1;
