@@ -1,5 +1,5 @@
+function [T2] = analize_video(file_ID,file_tsv,file_video,vidFrame,roi,plt)
 %% Load gaze data
-file_ID = "..\MATLAB\Eyetracker_Data-main\Data\User 0_all_gaze.csv"; 
 allgaze = import_data_gaze(file_ID);                             % Import gaze data
 Fs_g = 60;                                                                        % Sampling frequency Gaze 
 time_v = 0:1/Fs_g:length(allgaze)/Fs_g - (1/Fs_g);        % Time vector
@@ -7,78 +7,31 @@ valid = ~isnan(allgaze(:,1));
 test_interp= interpn(allgaze(valid,1),allgaze(valid,2),time_v,'linear'); 
 test_interp1= interpn(allgaze(valid,1),allgaze(valid,3),time_v,'linear'); 
 locs_clicks = find(allgaze(:,6)==3); 
-
-plot(test_interp,test_interp1)
-hold on
-plot(allgaze(valid,2),allgaze(valid,3))
 %% Load TSV
-file_tsv = "..\MATLAB\Eyetracker_Data-main\Data\prueba etiquetas f - Copy_February 20, 2023_13.50.tsv.xlsx"; 
 stim = load_tsv(file_tsv);
 %% Load video
-vidObj = VideoReader('..\MATLAB\Eyetracker_Data-main\Data\video_export_02-20-23-15.47.39.avi');
+vidObj = VideoReader(file_video);
 Fs_v = vidObj.FrameRate;                                                % Sampling frequency Video 
 time_2 = 0:1/Fs_v:vidObj.NumFrames/Fs_v - (1/Fs_v);   % Time vector
-
 %%         2. Detect trial start time 
 % Fixation cross
-vidObj.CurrentTime = 47;    % Moment in which cross was detected
-vidFrame = readFrame(vidObj);
 sample = rgb2gray(vidFrame);
 [start_trial_cross] = detect_fix_cross(sample, vidObj);
 % Check if correct fixation crosses were detected
-for i = 1:length(start_trial_cross)
-    vidObj.CurrentTime = start_trial_cross(i)/vidObj.FrameRate;
-    vidFrame = readFrame(vidObj);
-    nexttile 
-    imshow(vidFrame)
-end
+if plt
+    for i = 1:length(start_trial_cross)
+        vidObj.CurrentTime = start_trial_cross(i)/vidObj.FrameRate;
+        vidFrame = readFrame(vidObj);
+        nexttile 
+        imshow(vidFrame)
+    end
+end 
 %%         3. Segment data according to ongoing experiment phase 
 % Cross -> 1500ms -> Stim 1 -> 12500ms -> Stim 2 -> 14000ms -> Test ->
 % click -> click -> end
 Stim_1 = start_trial_cross + (Fs_v*1.5);              % 1.5 s 
 Stim_2 = start_trial_cross + (Fs_v*(1.5+12.5));       % 1.5 + 12.5 s 
 Stim_test = start_trial_cross + (Fs_v*(1.5+12.5+14)); % 1.5 + 12.5 + 14 s 
-
-figure;plot(allgaze(:,1),allgaze(:,end))
-hold on
-scatter(start_trial_cross/Fs_v,1,50,"green","filled","^")
-scatter(Stim_1/Fs_v,1,50,"black","filled","^")
-scatter(Stim_2/Fs_v,1,50,"black","filled","^")
-scatter(Stim_test/Fs_v,1,50,"red","filled","^")
-
-%%         4. Select ROI
-figure;
-frames_to_select = [Stim_1(1)+1, Stim_2(1)+1, Stim_test(1)+10];
-roi = cell(1,6);
-k = 1;
-for i = 1:length(frames_to_select)
-    vidObj.CurrentTime = time_2(frames_to_select(i));
-    vidFrame = readFrame(vidObj);
-    ax = gca();
-    imshow(vidFrame)
-if i == 1
-    rect = drawrectangle(gca);
-    roi{k} = rect.Position;
-    k = k+1;
-elseif i == 2
-    rect = drawrectangle(gca);
-    roi{k} = rect.Position;
-    k = k+1;
-     rect = drawrectangle(gca);
-    roi{k} = rect.Position;
-    k = k+1;
-    rect = drawrectangle(gca);
-    roi{k} = rect.Position;    
-    k = k+1;
-elseif i == 3
-     rect = drawrectangle(gca);
-    roi{k} = rect.Position;
-    k = k+1;
-     rect = drawrectangle(gca);
-    roi{k} = rect.Position;
-end 
-end 
-close all
 %% 4. Generate ROI-based summary results
 in = []; 
 xq = test_interp*1920;
@@ -129,64 +82,10 @@ end
 % Concatenate sessions
 summary = []; 
 for i = 1:length(stim)
-summary = cat(2,summary,stim_1_gaze(i,:),stim_2_gaze(i,:),stim_Test_gaze(i,:));
+    summary = cat(2,summary,stim_1_gaze(i,:),stim_2_gaze(i,:),stim_Test_gaze(i,:));
 end 
 % 
 sz = [1 length(varNames)];
 T2 = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
 T2{1,:} = summary; 
-
-%% Visualize data 
-figure;
-test               = downsample(in,6);
-test1              = downsample([xq;yq]',6);
-
-vidObj.CurrentTime = 47;
-i                  = find(time_2>=vidObj.CurrentTime,1,"first");
-
-while i < i+417
-    vidFrame = readFrame(vidObj);
-    ax = gca();
-    imshow(vidFrame)
-    hold(ax, 'on');
-    text(1000,440,num2str(i))
-    text(1000,480,num2str(test(i)))
-    plot(ax, test1(i-10:i,1),test1(i-10:i,2),"LineWidth",0.9);
-    hold(ax, 'off');
-    pause(1/vidObj.FrameRate);
-    i = i+1;
-end
-
-%% Visualize data 
-
-
-
-
-
-
-
-%%
-figure;plot(time_v, allgaze(:,1))
-hold on; plot(time_v, allgaze(:,2))
-xlabel('Tiempo (s)')
-ylabel('Coordenadas normalizadas')
-legend({'x','y'})
-%%
-figure;plot(allgaze(:,1), allgaze(:,2))
-hold on;
-xlabel('x')
-
-ylabel('y')
-vidObj.CurrentTime = time_2(frames_to_select(i));
-vidFrame = readFrame(vidObj);
-ax = gca();
-imshow(vidFrame)
-hold on
-h = drawrectangle('Position',[roi{1,r}(1,1),roi{1,r}(1,2),roi{1,r}(1,3),roi{1,r}(1,4)],'StripeColor','r');
-
-scatter(xq(1,logical(in(:,1))'),yq(1,logical(in(:,1))'))
-
-idx = find(in(Stim_2(i):Stim_3(i),1));
-stim_2_gaze(i) = numel(idx)*(1/Fs_v);
- 
-scatter(xq(1,logical(in(:,1))'),yq(1,logical(in(:,1))'))
+end 
