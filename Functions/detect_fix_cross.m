@@ -4,7 +4,8 @@ start_trial_cross = zeros(1,vidObj.NumFrames);
 
 % Fixation cross
 sample1 = imresize(sample,1/2);
-sample2 = sample1(181:252,405:533,:); 
+sample2 = sample1(161:252,405:533,:); 
+imshow(sample2)
 boxPoints = detectSURFFeatures(sample2);
 [boxFeatures, ~] = extractFeatures(sample2, boxPoints);
 
@@ -12,7 +13,7 @@ for frame = 1:5:vidObj.NumFrames
 % Current Frame:
 vidObj.CurrentTime = frame/ vidObj.FrameRate;
 vidFrame = imresize(readFrame(vidObj),1/2);
-C = rgb2gray(vidFrame(181:252,405:533,:));
+C = rgb2gray(vidFrame(161:252,405:533,:));
 scenePoints = detectSURFFeatures(C);
 % Matching Current Frame w/ sample : 
 [sceneFeatures, scenePoints] = extractFeatures(C, scenePoints);

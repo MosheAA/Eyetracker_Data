@@ -1,5 +1,9 @@
-function [stimulus] = load_tsv(file_ID)
-
-opts = detectImportOptions(file_ID,'Range',"MH21:MH22");
-T = readtable(file_ID,opts);
-stimulus = strsplit(T{1,1}{1},'|');
+function [stimulus] = load_tsv(file_ID,date)
+[~,~,a]=xlsread(file_ID);
+newStr = replace(upper(a(4:end, 1)),"P. M.","PM");
+newStr = replace(upper(newStr),"A. M.","AM");
+A1 = datetime(newStr,"InputFormat","dd/MM/yyyy h:mm:ss a");
+dt = 10; %[sec]
+tol = (dt/(60*60*24))/max(datenum([date;A1]));
+[~,loc] = ismembertol(datenum(date),datenum(A1),tol);
+stimulus = strsplit(a{loc+4,342},'|');
