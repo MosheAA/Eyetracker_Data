@@ -1,6 +1,6 @@
 function [T2] = analize_video(file_ID,file_tsv,file_video,vidFrame,roi,plt)
 %% Load gaze data
-allgaze = import_data_gaze(file_ID);                             % Import gaze data
+[allgaze,date] = import_data_gaze(file_ID);                             % Import gaze data
 Fs_g = 60;                                                                        % Sampling frequency Gaze 
 time_v = 0:1/Fs_g:length(allgaze)/Fs_g - (1/Fs_g);        % Time vector
 valid = ~isnan(allgaze(:,1));
@@ -8,7 +8,7 @@ test_interp= interpn(allgaze(valid,1),allgaze(valid,2),time_v,'linear');
 test_interp1= interpn(allgaze(valid,1),allgaze(valid,3),time_v,'linear'); 
 locs_clicks = find(allgaze(:,6)==3); 
 %% Load TSV
-stim = load_tsv(file_tsv);
+stim = load_tsv(file_tsv,date);
 %% Load video
 vidObj = VideoReader(file_video);
 Fs_v = vidObj.FrameRate;                                                % Sampling frequency Video 

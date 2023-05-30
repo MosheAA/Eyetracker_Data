@@ -1,0 +1,40 @@
+
+%% 
+[~,~,a]=xlsread('prueba etiquetas ensayos_29 de mayo de 2023_10.41.tsv');
+b=regexp(a,',','split');
+c=reshape([b{:}],numel(b{1}),[])'
+xlswrite('new_file.xlsx',c)
+%%
+
+file_ID     = "..\MATLAB\Eyetracker_Data-main\Data\6_all_gaze.csv"; 
+file_tsv    = "..\MATLAB\Eyetracker_Data-main\Data\prueba etiquetas ensayos_29 de mayo de 2023_10.41.tsv"; 
+file_video  = '..\MATLAB\Eyetracker_Data-main\Data\6.avi';
+load('..\MATLAB\Eyetracker_Data-main\Data\ROI.mat')
+load('..\MATLAB\Eyetracker_Data-main\Data\Vid_frame.mat')
+vidObj = VideoReader(file_video);
+vidObj.CurrentTime = 63;    % Moment in which cross was detected
+vidFrame = readFrame(vidObj);
+sample = rgb2gray(vidFrame);
+imshow(sample)
+
+[T2] = analize_video(file_ID,file_tsv,file_video,vidFrame,roi,0);
+
+
+Tfinal = [Tfinal;T2];
+%%
+stim = ["FL_26",	"FL_16",	"FL_15",	"FL_23",	"FL_25",	"FL_12",	"FL_13",	"FL_20",	"FL_19",...
+        "FL_18",	"FL_27",	"FL_22",	"FL_21",	"FL_24",	"FL_11",	"FL_10",	"FL_14",	"FL_17"]; 
+roi_s = ["ROI_1","ROI_2","ROI_3","ROI_4","ROI_5","ROI_6"];
+varTypes = cell(0); varNames = cell(0);
+% Create variable names
+k = 1;
+for s = 1:length(stim)
+    for r = 1:length(roi_s)
+        varNames{k} = char(strcat(stim(s),"_",roi_s(r)));
+        varTypes{k} = 'double';
+        k = k+1;
+    end 
+end 
+% 
+sz = [0 length(varNames)];
+t3 = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
