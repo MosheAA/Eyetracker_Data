@@ -14,6 +14,6 @@ for s = 1:length(stim)
     end 
 end 
 % 
-sz = [1 length(varNames)];
+sz = [0 length(varNames)];
 t3 = table('Size',sz,'VariableTypes',varTypes,'VariableNames',varNames);
 end 

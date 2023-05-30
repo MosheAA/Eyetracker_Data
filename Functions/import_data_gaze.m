@@ -1,4 +1,4 @@
-function [allgaze1,date] = import_data_gaze(file_id)
+function [allgaze1] = import_data_gaze(file_id)
 %% Set up the Import Options and import the data
 opts = detectImportOptions(file_id);
 var_names = {opts.SelectedVariableNames{1, 4},...
@@ -12,13 +12,6 @@ opts = setvartype(opts,var_names,'double');
 opts.SelectedVariableNames = var_names;
 % Import the data
 allgaze1 = readtable(file_id,opts);
-dt = strsplit(opts.VariableNames{1, 4},'_');
-date = datetime(str2double(dt{1, 2}),...
-                str2double(dt{1, 3}),...
-                str2double(dt{1, 4}(1:2)),...
-                str2double(dt{1, 4}(3:4)),...
-                str2double(dt{1, 5}), ...
-                str2double(dt{1, 6}));
 
 %% Convert to output type
 allgaze1 =allgaze1{:,1:6};
