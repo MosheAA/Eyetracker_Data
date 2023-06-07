@@ -1,13 +1,13 @@
 %%
 Tfinal = createtable(); % Crea una tabla vacía
 
-for ID = 1:3
+for ID = 2
 [file_ID,file_tsv,file_video] = create_file_name(ID);
 load('..\MATLAB\Eyetracker_Data-main\Data\ROI.mat')
-load('..\MATLAB\Eyetracker_Data-main\Data\Vid_frame1.mat')
-% load('C:\Users\naba_\OneDrive\Documentos\grupos de investigacion\mensajes eye tracker\matlab\3\Eyetracker_Data-main\Data\ROI.mat')
-% load('C:\Users\naba_\OneDrive\Documentos\grupos de investigacion\mensajes eye tracker\matlab\3\Eyetracker_Data-main\Data\Vid_frame1.mat')
-[T2] = analize_video(file_ID,file_tsv,file_video,vidFrame,roi,0,ID);
+load('..\MATLAB\Eyetracker_Data-main\Data\Vid_frames_v4.mat')
+%load('C:\Users\naba_\OneDrive\Documentos\grupos de investigacion\mensajes eye tracker\matlab\3\Eyetracker_Data-main\Data\ROI.mat')
+%load('C:\Users\naba_\OneDrive\Documentos\grupos de investigacion\mensajes eye tracker\matlab\3\Eyetracker_Data-main\Data\Vid_frames_v4.mat')
+[T2] = analize_video(file_ID,file_tsv,file_video,roi,sample_cell,0,ID);
 Tfinal = [Tfinal;T2];
 writetable(Tfinal,'Results.csv','Delimiter',';');
 end 

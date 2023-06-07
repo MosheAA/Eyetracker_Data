@@ -21,9 +21,27 @@ time_2 = 0:1/Fs_v:vidObj.NumFrames/Fs_v - (1/Fs_v);   % Time vector
 
 %%         2. Detect trial start time 
 % Fixation cross
-vidObj.CurrentTime = 47;    % Moment in which cross was detected
+IDX = [58.5, 63, 75, 90];
+161:252,405:533
+1:261,200:750
+250:400,200:750
+273:320,710:760
+samplefinal = [];
+for i = IDX
+vidObj.CurrentTime = i;    % Moment in which cross was detected
 vidFrame = readFrame(vidObj);
 sample = rgb2gray(vidFrame);
+imshow(sample)
+sample1 = imresize(sample,1/2);
+imshow(sample1)
+%sample_cell = {sample_f1,sample_f2,sample_f3,sample_f4};
+sample_f4 = sample1(1:350,200:800,:); 
+imshow(sample_f4)
+boxPoints = detectSURFFeatures(sample_f4,'MetricThreshold',1);
+samplefinal = cat(3,samplefinal,sample2);
+pause
+end 
+imshow(sample)
 [start_trial_cross] = detect_fix_cross(sample, vidObj);
 % Check if correct fixation crosses were detected
 for i = 1:length(start_trial_cross)
@@ -48,7 +66,7 @@ scatter(Stim_test/Fs_v,1,50,"red","filled","^")
 
 %%         4. Select ROI
 figure;
-frames_to_select = [Stim_1(1)+1, Stim_2(1)+1, Stim_test(1)+10];
+frames_to_select = [Stim_1(1)+10, Stim_2(1)+1, Stim_test(1)+10];
 roi = cell(1,6);
 k = 1;
 for i = 1:length(frames_to_select)

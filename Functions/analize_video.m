@@ -1,4 +1,4 @@
-function [T2] = analize_video(file_ID,file_tsv,file_video,vidFrame,roi,plt,ID)
+function [T2] = analize_video(file_ID,file_tsv,file_video,roi,sample_cell,plt,ID)
 %% Load gaze data
 warning off
 [allgaze] = import_data_gaze(file_ID);                             % Import gaze data
@@ -16,10 +16,11 @@ Fs_v = vidObj.FrameRate;                                                % Sampli
 time_2 = 0:1/Fs_v:vidObj.NumFrames/Fs_v - (1/Fs_v);   % Time vector
 %%         2. Detect trial start time 
 % Fixation cross
-sample = rgb2gray(vidFrame);
-[start_trial_cross] = detect_fix_cross(sample, vidObj);
+
+locs_cell = detect_fix_cross(sample_cell,vidObj);
 % Check if correct fixation crosses were detected
 if plt
+    start_trial_cross = locs_cell{1};
     for i = 1:length(start_trial_cross)
         vidObj.CurrentTime = start_trial_cross(i)/vidObj.FrameRate;
         vidFrame = readFrame(vidObj);
@@ -28,11 +29,9 @@ if plt
     end
 end 
 %%         3. Segment data according to ongoing experiment phase 
-% Cross -> 1500ms -> Stim 1 -> 12500ms -> Stim 2 -> 14000ms -> Test ->
-% click -> click -> end
-Stim_1 = start_trial_cross + (Fs_v*1.5);              % 1.5 s 
-Stim_2 = start_trial_cross + (Fs_v*(1.5+12.5));       % 1.5 + 12.5 s 
-Stim_test = start_trial_cross + (Fs_v*(1.5+12.5+14)); % 1.5 + 12.5 + 14 s 
+Stim_1 = locs_cell{2};             % 1.5 s 
+Stim_2 = locs_cell{3};       % 1.5 + 12.5 s 
+Stim_test = locs_cell{4}; % 1.5 + 12.5 + 14 s 
 %% 4. Generate ROI-based summary results
 in = []; 
 xq = test_interp*1920;
